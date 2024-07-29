@@ -6,4 +6,4 @@ COPY src/ /var/www/html
 # For example:
 ADD --chown=$APP_USER:$APP_GROUP ./ /var/www/html/
 
-EXPOSE 90
+EXPOSE 80

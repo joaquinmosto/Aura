@@ -59,13 +59,14 @@ class UserController extends AbstractController
         $lastUsername = $authenticationUtils->getLastUsername();
 
         if ($error) {
-            return new JsonResponse([
-                'error' => 'Invalid credentials'
-            ], Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse(
+            [
+                'error' => "Invalid credentials"
+            ], 
+            Response::HTTP_UNAUTHORIZED);
         }
 
-        return new JsonResponse
-        (
+        return new JsonResponse(
             [
                 'message' => "User logged in successfully",
                 'username' => $lastUsername
