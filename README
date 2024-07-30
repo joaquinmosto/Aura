@@ -9,3 +9,5 @@ Para levantar el proyecto por primera vez deben tirar los siguientes comandos de
 docker build -t aura/symfony .   
 
 docker run -p 90:80 aura/symfony
+
+primer puerto localpc, segundo puerto docker
