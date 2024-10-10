@@ -6,7 +6,7 @@ La misma con fue utilizada con el tag "php8.1"
 ----------------------------------------------------------------------------------------------------------------------------------------------
 Para levantar el proyecto por primera vez deben tirar los siguientes comandos de Docker:
 
-docker build -t aura/symfony .   
+docker build -t aura/symfony .
 
 docker run -p 90:80 aura/symfony
 
