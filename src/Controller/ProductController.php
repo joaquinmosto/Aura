@@ -33,9 +33,8 @@ class ProductController extends AbstractController
 
         $requestData = json_decode($jsonData, true);
 
-        if (isset($requestData['created_at'])) {
-            $createdAt = new \DateTimeImmutable($requestData['created_at']);
-            $product->setCreatedAt($createdAt);
+        if (!isset($requestData['created_at'])) {
+            $product->setCreatedAt(new \DateTimeImmutable());
         }
         
         $entityManager->persist($product);
