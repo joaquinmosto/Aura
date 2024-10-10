@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\SerializedName;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
@@ -22,8 +23,9 @@ class Product
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
 
-    #[ORM\Column]
-    private ?bool $isFeatured = null;
+    #[SerializedName("is_featured")]
+    #[ORM\Column(nullable: true)]
+    private ?bool $is_featured = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $created_at = null;
@@ -71,12 +73,12 @@ class Product
 
     public function isFeatured(): ?bool
     {
-        return $this->isFeatured;
+        return $this->is_featured;
     }
 
-    public function setFeatured(bool $isFeatured): static
+    public function setFeatured(bool $is_featured): static
     {
-        $this->isFeatured = $isFeatured;
+        $this->is_featured = $is_featured;
 
         return $this;
     }
