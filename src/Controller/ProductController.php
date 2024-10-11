@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Product;
 use App\Entity\User;
+use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -96,5 +97,67 @@ class ProductController extends AbstractController
                 Response::HTTP_UNAUTHORIZED
             );
         }
+    }
+
+    #[Route("/product/{id}", name: "product_show", methods: ['GET'])]
+    public function findById(int $id, ProductRepository $productRepository): JsonResponse
+    {
+        $product = $productRepository->findById($id);
+
+        if (!$product) {
+            return new JsonResponse(['error' => 'Product not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        return new JsonResponse($product->toArray(), Response::HTTP_OK);
+    }
+
+    #[Route("/products", name: "product_all", methods: ['GET'])]
+    public function findAll(ProductRepository $productRepository): JsonResponse
+    {
+        $products = $productRepository->findAllProducts();
+
+        $productsArray = array_map(fn($product) => $product->toArray(), $products);
+
+        return new JsonResponse($productsArray, Response::HTTP_OK);
+    }
+
+    #[Route("/products/featured", name: "product_featured", methods: ['GET'])]
+    public function findFeatured(ProductRepository $productRepository): JsonResponse
+    {
+        $featuredProducts = $productRepository->findFeaturedProducts();
+
+        $productsArray = array_map(fn($product) => $product->toArray(), $featuredProducts);
+
+        return new JsonResponse($productsArray, Response::HTTP_OK);
+    }
+
+    #[Route("/product/edit/{id}", name: "product_edit", methods: ['PUT'])]
+    public function editProduct(int $id, Request $request, EntityManagerInterface $entityManager, ProductRepository $productRepository): JsonResponse
+    {
+        $product = $productRepository->findById($id);
+
+        if (!$product) {
+            return new JsonResponse(['error' => 'Product not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        // Actualizar los campos según los datos recibidos
+        if (isset($data['name'])) {
+            $product->setName($data['name']);
+        }
+        if (isset($data['description'])) {
+            $product->setDescription($data['description']);
+        }
+        if (isset($data['image'])) {
+            $product->setImage($data['image']);
+        }
+        if (isset($data['is_featured'])) {
+            $product->setFeatured($data['is_featured']);
+        }
+
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'Product updated successfully!'], Response::HTTP_OK);
     }
 }

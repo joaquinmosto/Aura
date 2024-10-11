@@ -11,3 +11,7 @@ docker build -t aura/symfony .
 docker run -p 90:80 aura/symfony
 
 primer puerto localpc, segundo puerto docker
+
+PARA HACERLO EN UN SOLO PASO:
+
+-- docker-compose up --build

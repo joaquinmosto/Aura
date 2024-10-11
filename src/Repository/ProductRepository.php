@@ -16,6 +16,30 @@ class ProductRepository extends ServiceEntityRepository
         parent::__construct($registry, Product::class);
     }
 
+    // Encuentra un producto por su ID
+    public function findById(int $id): ?Product
+    {
+        return $this->find($id);
+    }
+
+    // Encuentra todos los productos
+    public function findAllProducts(): array
+    {
+        return $this->findAll();
+    }
+
+    // Encuentra los productos con isFeatured en true y los ordena por fecha de creación
+    public function findFeaturedProducts(int $limit = 10): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.isFeatured = :featured')
+            ->setParameter('featured', true)
+            ->orderBy('p.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Product[] Returns an array of Product objects
     //     */

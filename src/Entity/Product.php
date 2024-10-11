@@ -94,4 +94,16 @@ class Product
 
         return $this;
     }
+
+    public function toArray(): array
+    {
+    return [
+        'id' => $this->getId(),
+        'name' => $this->getName(),
+        'description' => $this->getDescription(),
+        'image' => $this->getImage(),
+        'is_featured' => $this->isFeatured(),
+        'created_at' => $this->getCreatedAt() ? $this->getCreatedAt()->format('Y-m-d H:i:s') : null,
+    ];
+    }
 }
