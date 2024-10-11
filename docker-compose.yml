@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aura_symfony
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "90:80"
+    environment:
+      APP_ENV: dev
+    networks:
+      - symfony_network
+
+networks:
+  symfony_network:
+    driver: bridge
