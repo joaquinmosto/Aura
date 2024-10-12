@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Product;
-use App\Entity\User;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,17 +10,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Core\Exception\UserNotFoundException;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 
+#[Route("/product")]
 class ProductController extends AbstractController
 {
-    #[Route("/created_product", name: "product", methods: ['POST'])]
+    #[Route("/created", name: "created", methods: ['POST'])]
     public function createdProduct(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
     {
         $jsonData = $request->getContent();
@@ -44,15 +40,15 @@ class ProductController extends AbstractController
 
         return new JsonResponse(
             [
-                'status' => 'Product created successfully!',
+                'status'  => "Product created successfully!",
                 'product' => 
                 [
-                    'id' => $product->getId(),
-                    'name' => $product->getName(),
+                    'id'          => $product->getId(),
+                    'name'        => $product->getName(),
                     'description' => $product->getDescription(),
-                    'image' => $product->getImage(),
+                    'image'       => $product->getImage(),
                     'is_featured' => $product->isFeatured(),
-                    'created_at' => $product->getCreatedAt() ? $product->getCreatedAt()->format('Y-m-d H:i:s') : null
+                    'created_at'  => $product->getCreatedAt() ? $product->getCreatedAt()->format('Y-m-d H:i:s') : null
                 ]
             ], 
         JsonResponse::HTTP_CREATED);
@@ -100,30 +96,28 @@ class ProductController extends AbstractController
     //     }
     // }
 
-    #[Route("/product/{id}", name: "product_show", methods: ['GET'])]
+    #[Route("/{id}", name: "product_show", methods: ['GET'])]
     public function findById(int $id, ProductRepository $productRepository): JsonResponse
     {
-        $product = $productRepository->findById($id);
-
-        if (!$product) {
-            return new JsonResponse(['error' => 'Product not found'], Response::HTTP_NOT_FOUND);
+        if (! $productRepository->find($id)) {
+            return new JsonResponse(['error' => "Product not found"], Response::HTTP_NOT_FOUND);
         }
-
-        return new JsonResponse($product->toArray(), Response::HTTP_OK);
+        // Fichar el toArray, me suena raro que no se toJson o algo por el estilo
+        return new JsonResponse($productRepository->find($id)->toArray(), Response::HTTP_OK);
     }
 
-    #[Route("/products", name: "product_all", methods: ['GET'])]
+    #[Route("/all", name: "product_all", methods: ['GET'])]
     public function findAll(ProductRepository $productRepository): JsonResponse
     {
-        $products = $productRepository->findAllProducts();
+        $products = $productRepository->findAll();
 
         $productsArray = array_map(fn($product) => $product->toArray(), $products);
 
         return new JsonResponse($productsArray, Response::HTTP_OK);
     }
 
-    #[Route("/products/featured", name: "product_featured", methods: ['GET'])]
-    public function findFeatured(ProductRepository $productRepository): JsonResponse
+    #[Route("/featured", name: "product_featured", methods: ['GET'])]
+    public function findProductByFeatured(ProductRepository $productRepository): JsonResponse
     {
         $featuredProducts = $productRepository->findFeaturedProducts();
 
@@ -132,7 +126,7 @@ class ProductController extends AbstractController
         return new JsonResponse($productsArray, Response::HTTP_OK);
     }
 
-    #[Route("/product/edit", name: "product_edit", methods: ['PUT'])]
+    #[Route("/edit", name: "product_edit", methods: ['PUT'])]
     public function editProduct(Request $request, EntityManagerInterface $entityManager, ProductRepository $productRepository, SerializerInterface $serializer): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -152,19 +146,18 @@ class ProductController extends AbstractController
         return new JsonResponse(['status' => 'Product updated successfully!'], Response::HTTP_OK);
     }
 
-    #[Route("/product/delete/{id}", name: "product_delete", methods: ['DELETE'])]
+    #[Route("/delete/{id}", name: "product_delete", methods: ['DELETE'])]
     public function deleteProduct(int $id, ProductRepository $productRepository, EntityManagerInterface $entityManager): JsonResponse
     {
-    $product = $productRepository->findById($id);
+        $product = $productRepository->find($id);
+        
+        if (! $product) {
+            return new JsonResponse(['error' => "Product not found"], Response::HTTP_NOT_FOUND);
+        }
 
-    if (!$product) {
-        return new JsonResponse(['error' => 'Product not found'], Response::HTTP_NOT_FOUND);
+        $entityManager->remove($product);
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => "Product deleted successfully!"], Response::HTTP_OK);
     }
-
-    $entityManager->remove($product);
-    $entityManager->flush();
-
-    return new JsonResponse(['status' => 'Product deleted successfully!'], Response::HTTP_OK);
-    }
-
 }
