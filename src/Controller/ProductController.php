@@ -133,24 +133,24 @@ class ProductController extends AbstractController
         $product = $productRepository->find($data["id"]);
 
         if (! $product) {
-            return new JsonResponse(['error' => 'Product not exist0'], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(['error' => "Product not exist"], Response::HTTP_NOT_FOUND);
         }
 
         try {
-            $serializer->deserialize($request->getContent(), Product::class, 'json', ['object_to_populate' => $product]);
+            $serializer->deserialize($request->getContent(), Product::class, "json", ['object_to_populate' => $product]);
         } catch (NotEncodableValueException $e) {
-            return new JsonResponse(['error' => 'Invalid data provided'], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['error' => "Invalid data provided"], Response::HTTP_BAD_REQUEST);
         }
     
         $entityManager->flush();
-        return new JsonResponse(['status' => 'Product updated successfully!'], Response::HTTP_OK);
+        return new JsonResponse(['status' => "Product updated successfully!"], Response::HTTP_OK);
     }
 
     #[Route("/delete/{id}", name: "product_delete", methods: ['DELETE'])]
     public function deleteProduct(int $id, ProductRepository $productRepository, EntityManagerInterface $entityManager): JsonResponse
     {
         $product = $productRepository->find($id);
-        
+
         if (! $product) {
             return new JsonResponse(['error' => "Product not found"], Response::HTTP_NOT_FOUND);
         }
