@@ -15,6 +15,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -57,47 +58,47 @@ class ProductController extends AbstractController
         JsonResponse::HTTP_CREATED);
     }
 
-    #[Route("/login", name: "login", methods: ['POST'])]
-    public function login(Request $request, UserPasswordHasherInterface $passwordHasher, UserProviderInterface $userProvider): Response
-    {
-        $data = json_decode($request->getContent(), true);
+    // #[Route("/login", name: "login", methods: ['POST'])]
+    // public function login(Request $request, UserPasswordHasherInterface $passwordHasher, UserProviderInterface $userProvider): Response
+    // {
+    //     $data = json_decode($request->getContent(), true);
 
-        $username = $data['email'] ?? null;
-        $password = $data['password'] ?? null;
+    //     $username = $data['email'] ?? null;
+    //     $password = $data['password'] ?? null;
 
-        if (!$username || !$password) {
-            return new JsonResponse(['error' => "Invalid credentials"], Response::HTTP_BAD_REQUEST);
-        }
+    //     if (!$username || !$password) {
+    //         return new JsonResponse(['error' => "Invalid credentials"], Response::HTTP_BAD_REQUEST);
+    //     }
 
-        try {
-            $user = $userProvider->loadUserByIdentifier($username);
+    //     try {
+    //         $user = $userProvider->loadUserByIdentifier($username);
 
-            if (!$user instanceof PasswordAuthenticatedUserInterface) {
-                throw new \LogicException('El usuario no implementa PasswordAuthenticatedUserInterface.');
-            }
+    //         if (!$user instanceof PasswordAuthenticatedUserInterface) {
+    //             throw new \LogicException('El usuario no implementa PasswordAuthenticatedUserInterface.');
+    //         }
 
-            if ($passwordHasher->isPasswordValid($user, $password)) {
-                return new JsonResponse(
-                    [
-                        'message' => "User logged in successfully",
-                        'username' => $username
-                    ],
-                    Response::HTTP_OK
-                );
-            } else {
-                return new JsonResponse(
-                    ['error' => "Invalid credentials"],
-                    Response::HTTP_UNAUTHORIZED
-                );
-            }
+    //         if ($passwordHasher->isPasswordValid($user, $password)) {
+    //             return new JsonResponse(
+    //                 [
+    //                     'message' => "User logged in successfully",
+    //                     'username' => $username
+    //                 ],
+    //                 Response::HTTP_OK
+    //             );
+    //         } else {
+    //             return new JsonResponse(
+    //                 ['error' => "Invalid credentials"],
+    //                 Response::HTTP_UNAUTHORIZED
+    //             );
+    //         }
             
-        } catch (UserNotFoundException $e) {
-            return new JsonResponse(
-                ['error' => "Invalid credentials"],
-                Response::HTTP_UNAUTHORIZED
-            );
-        }
-    }
+    //     } catch (UserNotFoundException $e) {
+    //         return new JsonResponse(
+    //             ['error' => "Invalid credentials"],
+    //             Response::HTTP_UNAUTHORIZED
+    //         );
+    //     }
+    // }
 
     #[Route("/product/{id}", name: "product_show", methods: ['GET'])]
     public function findById(int $id, ProductRepository $productRepository): JsonResponse
@@ -131,33 +132,23 @@ class ProductController extends AbstractController
         return new JsonResponse($productsArray, Response::HTTP_OK);
     }
 
-    #[Route("/product/edit/{id}", name: "product_edit", methods: ['PUT'])]
-    public function editProduct(int $id, Request $request, EntityManagerInterface $entityManager, ProductRepository $productRepository): JsonResponse
+    #[Route("/product/edit", name: "product_edit", methods: ['PUT'])]
+    public function editProduct(Request $request, EntityManagerInterface $entityManager, ProductRepository $productRepository, SerializerInterface $serializer): JsonResponse
     {
-        $product = $productRepository->findById($id);
-
-        if (!$product) {
-            return new JsonResponse(['error' => 'Product not found'], Response::HTTP_NOT_FOUND);
-        }
-
         $data = json_decode($request->getContent(), true);
+        $product = $productRepository->find($data["id"]);
 
-        // Actualizar los campos según los datos recibidos
-        if (isset($data['name'])) {
-            $product->setName($data['name']);
-        }
-        if (isset($data['description'])) {
-            $product->setDescription($data['description']);
-        }
-        if (isset($data['image'])) {
-            $product->setImage($data['image']);
-        }
-        if (isset($data['is_featured'])) {
-            $product->setFeatured($data['is_featured']);
+        if (! $product) {
+            return new JsonResponse(['error' => 'Product not exist0'], Response::HTTP_NOT_FOUND);
         }
 
+        try {
+            $serializer->deserialize($request->getContent(), Product::class, 'json', ['object_to_populate' => $product]);
+        } catch (NotEncodableValueException $e) {
+            return new JsonResponse(['error' => 'Invalid data provided'], Response::HTTP_BAD_REQUEST);
+        }
+    
         $entityManager->flush();
-
         return new JsonResponse(['status' => 'Product updated successfully!'], Response::HTTP_OK);
     }
 
