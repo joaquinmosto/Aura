@@ -13,6 +13,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 
 class UserController extends AbstractController
 {
@@ -46,7 +47,7 @@ class UserController extends AbstractController
     }
 
     #[Route("/login", name: "login", methods: ['POST'])]
-    public function login(Request $request, UserPasswordHasherInterface $passwordHasher, UserProviderInterface $userProvider): Response
+    public function login(Request $request, UserPasswordHasherInterface $passwordHasher, UserProviderInterface $userProvider, JWTTokenManagerInterface $JWTManager): Response
     {
         $data = json_decode($request->getContent(), true);
 
@@ -65,10 +66,12 @@ class UserController extends AbstractController
             }
 
             if ($passwordHasher->isPasswordValid($user, $password)) {
+                
                 return new JsonResponse(
                     [
-                        'message' => "User logged in successfully",
-                        'username' => $username
+                        'message'   => "User logged in successfully",
+                        'username'  => $username,
+                        'token'     => $JWTManager->create($user)
                     ],
                     Response::HTTP_OK
                 );
