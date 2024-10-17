@@ -64,7 +64,8 @@ security:
     # Con esto podemos denegar acceso a ciertas rutas
     access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/, roles: PUBLIC_ACCESS }
+        - { path: ^/, roles: ROLE_USER }
+        # - { path: ^/, roles: PUBLIC_ACCESS }
     #     # require ROLE_ADMIN for /admin*
     #     - { path: '^/admin', roles: ROLE_ADMIN }
 
