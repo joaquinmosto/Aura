@@ -51,7 +51,7 @@ class UserController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        $username = $data['email'] ?? null;
+        $username = $data['username'] ?? null;
         $password = $data['password'] ?? null;
 
         if (!$username || !$password) {
@@ -66,7 +66,6 @@ class UserController extends AbstractController
             }
 
             if ($passwordHasher->isPasswordValid($user, $password)) {
-                
                 return new JsonResponse(
                     [
                         'message'   => "User logged in successfully",

@@ -25,10 +25,12 @@ security:
                 check_path: /login
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            provider: app_user_provider
         api:
             pattern: ^/
             stateless: true
             jwt: ~
+            provider: app_user_provider
 
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -62,6 +64,7 @@ security:
     # Con esto podemos denegar acceso a ciertas rutas
     access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/, roles: PUBLIC_ACCESS }
     #     # require ROLE_ADMIN for /admin*
     #     - { path: '^/admin', roles: ROLE_ADMIN }
 

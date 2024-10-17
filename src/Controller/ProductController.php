@@ -54,48 +54,6 @@ class ProductController extends AbstractController
         JsonResponse::HTTP_CREATED);
     }
 
-    // #[Route("/login", name: "login", methods: ['POST'])]
-    // public function login(Request $request, UserPasswordHasherInterface $passwordHasher, UserProviderInterface $userProvider): Response
-    // {
-    //     $data = json_decode($request->getContent(), true);
-
-    //     $username = $data['email'] ?? null;
-    //     $password = $data['password'] ?? null;
-
-    //     if (!$username || !$password) {
-    //         return new JsonResponse(['error' => "Invalid credentials"], Response::HTTP_BAD_REQUEST);
-    //     }
-
-    //     try {
-    //         $user = $userProvider->loadUserByIdentifier($username);
-
-    //         if (!$user instanceof PasswordAuthenticatedUserInterface) {
-    //             throw new \LogicException('El usuario no implementa PasswordAuthenticatedUserInterface.');
-    //         }
-
-    //         if ($passwordHasher->isPasswordValid($user, $password)) {
-    //             return new JsonResponse(
-    //                 [
-    //                     'message' => "User logged in successfully",
-    //                     'username' => $username
-    //                 ],
-    //                 Response::HTTP_OK
-    //             );
-    //         } else {
-    //             return new JsonResponse(
-    //                 ['error' => "Invalid credentials"],
-    //                 Response::HTTP_UNAUTHORIZED
-    //             );
-    //         }
-            
-    //     } catch (UserNotFoundException $e) {
-    //         return new JsonResponse(
-    //             ['error' => "Invalid credentials"],
-    //             Response::HTTP_UNAUTHORIZED
-    //         );
-    //     }
-    // }
-
     #[Route("/{id}", name: "product_show", methods: ['GET'])]
     public function findById(int $id, ProductRepository $productRepository): JsonResponse
     {
