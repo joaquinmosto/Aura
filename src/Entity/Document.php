@@ -19,6 +19,10 @@ class Document
     #[ORM\ManyToOne]
     private ?DocumentType $type = null;
 
+    #[ORM\OneToOne(inversedBy: 'document', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Person $person = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -44,6 +48,18 @@ class Document
     public function setType(?DocumentType $type): static
     {
         $this->type = $type;
+
+        return $this;
+    }
+
+    public function getPerson(): ?Person
+    {
+        return $this->person;
+    }
+
+    public function setPerson(?Person $person): static
+    {
+        $this->person = $person;
 
         return $this;
     }

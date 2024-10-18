@@ -19,9 +19,15 @@ class Person
     #[ORM\Column(length: 255)]
     private ?string $last_name = null;
 
-    #[ORM\ManyToOne(inversedBy: 'persons')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Address $adress_id = null;
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Address $address = null;
+
+    #[ORM\OneToOne(mappedBy: 'person', cascade: ['persist', 'remove'])]
+    private ?Document $document = null;
+    
+    #[ORM\OneToOne(mappedBy: 'person', cascade: ['persist', 'remove'])]
+    private ?User $user = null;
 
     public function getId(): ?int
     {
@@ -52,14 +58,45 @@ class Person
         return $this;
     }
 
-    public function getAdressId(): ?Address
+    public function getAddress(): ?Address
     {
-        return $this->adress_id;
+        return $this->address;
     }
 
-    public function setAdressId(?Address $adress_id): static
+    public function setAddress(?Address $address): static
     {
-        $this->adress_id = $adress_id;
+        $this->address = $address;
+
+        return $this;
+    }
+    public function getDocument(): ?Document
+    {
+        return $this->document;
+    }
+
+    public function setDocument(?Document $document): static
+    {
+        if ($document->getPerson() !== $this) {
+            $document->setPerson($this);
+        }
+
+        $this->document = $document;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        if ($user && $user->getPerson() !== $this) {
+            $user->setPerson($this);
+        }
+
+        $this->user = $user;
 
         return $this;
     }

@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\AddressRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AddressRepository::class)]
@@ -23,17 +21,6 @@ class Address
 
     #[ORM\ManyToOne]
     private ?City $city = null;
-
-    /**
-     * @var Collection<int, Person>
-     */
-    #[ORM\OneToMany(mappedBy: 'adress_id', targetEntity: Person::class)]
-    private Collection $persons;
-
-    public function __construct()
-    {
-        $this->persons = new ArrayCollection();
-    }
 
     public function getId(): ?int
     {
@@ -72,36 +59,6 @@ class Address
     public function setCity(?City $city): static
     {
         $this->city = $city;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Person>
-     */
-    public function getPersons(): Collection
-    {
-        return $this->persons;
-    }
-
-    public function addPerson(Person $person): static
-    {
-        if (!$this->persons->contains($person)) {
-            $this->persons->add($person);
-            $person->setAdressId($this);
-        }
-
-        return $this;
-    }
-
-    public function removePerson(Person $person): static
-    {
-        if ($this->persons->removeElement($person)) {
-            // set the owning side to null (unless already changed)
-            if ($person->getAdressId() === $this) {
-                $person->setAdressId(null);
-            }
-        }
 
         return $this;
     }

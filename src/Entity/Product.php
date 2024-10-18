@@ -27,8 +27,8 @@ class Product
     #[ORM\Column(nullable: true)]
     private ?bool $is_featured = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $created_at = null;
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTime $created_at = null;
 
     public function getId(): ?int
     {
