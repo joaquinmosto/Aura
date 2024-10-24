@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Service\MailerService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,6 +18,13 @@ use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 
 class UserController extends AbstractController
 {
+    private $mailerService;
+
+    public function __construct(MailerService $mailerService)
+    {
+        $this->mailerService = $mailerService;
+    }
+
     #[Route("/register", name: "register", methods: ['POST'])]
     public function createdUser(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -39,6 +47,8 @@ class UserController extends AbstractController
 
             $entityManager->persist($user);
             $entityManager->flush();
+
+            $this->mailerService->sendEmail($email, "Welcome!", "Thank you for registering!");
 
             return new JsonResponse(['message' => "User created successfully"], Response::HTTP_CREATED);
 
@@ -95,13 +105,3 @@ class UserController extends AbstractController
     {
     }
 }
-
-    ########################################################################################
-  #                                                                                          #
- #                                                                                             #
-#    ░█▀▀█ ▒█▀▀█ ▒█░▒█ ░█▀▀█ ▒█▄░▒█ ▀▀█▀▀ ▒█▀▀▀ 　 ▒█▀▀▀ ▒█░░░ 　 ▒█▀▀▀ ░█▀▀█ ▒█▀▀▀█ ▒█▀▀▀█     #
-#    ▒█▄▄█ ▒█░▄▄ ▒█░▒█ ▒█▄▄█ ▒█▒█▒█ ░▒█░░ ▒█▀▀▀ 　 ▒█▀▀▀ ▒█░░░ 　 ▒█▀▀▀ ▒█▄▄█ ░▀▀▀▄▄ ▒█░░▒█     #
-#    ▒█░▒█ ▒█▄▄█ ░▀▄▄▀ ▒█░▒█ ▒█░░▀█ ░▒█░░ ▒█▄▄▄ 　 ▒█▄▄▄ ▒█▄▄█ 　 ▒█░░░ ▒█░▒█ ▒█▄▄▄█ ▒█▄▄▄█     #
- #                                                                                             #
-
-    ########################################################################################
