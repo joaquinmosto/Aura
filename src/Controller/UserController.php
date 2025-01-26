@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Service\MailerService;
+use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,10 +20,12 @@ use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 class UserController extends AbstractController
 {
     private $mailerService;
+    private $userService;
 
-    public function __construct(MailerService $mailerService)
+    public function __construct(MailerService $mailerService, UserService $userService)
     {
         $this->mailerService = $mailerService;
+        $this->userService = $userService;
     }
 
     #[Route("/register", name: "register", methods: ['POST'])]
@@ -103,5 +106,20 @@ class UserController extends AbstractController
     #[Route("/logout", name: "logout")]
     public function logout(): void
     {
+    }
+
+    #[Route("/user/data", name: "user_data", methods: ['GET'])]
+    public function getUserData(): JsonResponse
+    {
+        $user = $this->userService->getUserData();
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not found'], 404);
+        }
+
+        return new JsonResponse([
+            'id' => $user->getId(),
+            'email' => $user->getEmail(),
+        ]);
     }
 }

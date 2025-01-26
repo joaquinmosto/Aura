@@ -30,6 +30,12 @@ class Product
     #[ORM\Column(type: 'datetime')]
     private ?\DateTime $created_at = null;
 
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTime $delete_at = null;
+
+    #[ORM\Column(type: 'integer', nullable: true)] 
+    private ?int $totalPass = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -95,6 +101,28 @@ class Product
         return $this;
     }
 
+    public function getDeleteAt(): ?\DateTime
+    {
+        return $this->delete_at;
+    }
+
+    public function setDeleteAt(\DateTime $delete_at): static
+    {
+        $this->delete_at = $delete_at;
+
+        return $this;
+    }
+
+    public function getTotalPass(): ?int
+    { 
+        return $this->totalPass; 
+    }
+    
+    public function setTotalPass(int $totalPass): static
+    { 
+        $this->totalPass = $totalPass; return $this; 
+    }
+
     public function toArray(): array
     {
     return [
@@ -104,6 +132,8 @@ class Product
         'image' => $this->getImage(),
         'is_featured' => $this->isFeatured(),
         'created_at' => $this->getCreatedAt() ? $this->getCreatedAt()->format('Y-m-d H:i:s') : null,
+        'delete_at' => $this->getDeleteAt() ? $this->getDeleteAt()->format('Y-m-d H:i:s') : null,
+        'total_pass' => $this->getTotalPass(),
     ];
     }
 }

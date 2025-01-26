@@ -4,7 +4,12 @@ namespace App\Controller;
 
 use App\Entity\Product;
 use App\Repository\ProductRepository;
+use App\Service\EncryptionService;
+use App\Service\MailerService;
+use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Writer\PngWriter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,6 +22,19 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Route("/product")]
 class ProductController extends AbstractController
 {
+    private EncryptionService $encryptionService; 
+    private MailerService $mailService; 
+    private EntityManagerInterface $entityManager;
+    private UserService $userService;
+
+    public function __construct( EncryptionService $encryptionService, MailerService $mailService, EntityManagerInterface $entityManager, UserService $userService )
+    { 
+        $this->encryptionService = $encryptionService;
+        $this->mailService = $mailService;
+        $this->entityManager = $entityManager; 
+        $this->userService = $userService;
+    }
+
     #[Route("/created", name: "created", methods: ['POST'])]
     public function createdProduct(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
     {
@@ -32,11 +50,27 @@ class ProductController extends AbstractController
         $requestData = json_decode($jsonData, true);
 
         if (!isset($requestData['created_at'])) {
-            $product->setCreatedAt(new \DateTime());
+            $product->setCreatedAt(new \DateTime('now', new \DateTimeZone('America/Argentina/Buenos_Aires')));
         }
         
         $entityManager->persist($product);
         $entityManager->flush();
+
+        $encryptedId = $this->encryptionService->encrypt($product->getId());
+
+        $qrCode = Builder::create()->writer(new PngWriter())->data($encryptedId)->build();
+        $qrPath = '/qr/qr_code_' . $product->getId() . '.png'; $qrCode->saveToFile($qrPath);
+
+        $qrImageContent = base64_encode(file_get_contents($qrPath)); 
+        $qrImageBase64 = 'data:image/png;base64,' . $qrImageContent; 
+        $emailBody = '<html><body><p>¡Hola! Aquí tienes el código QR con el que podras ingresar.</p><img src="' . $qrImageBase64 . '"></body></html>';
+        
+        $this->mailService->sendHtmlEmailWithAttachment( 
+            $this->userService->getUserData()->getEmail(),
+            'Confirmacion De Compra', 
+            $emailBody, 
+            $qrPath 
+        );
 
         return new JsonResponse(
             [

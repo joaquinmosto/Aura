@@ -27,3 +27,11 @@ services:
     App\Service\MailerService:
         arguments:
             $mailer: '@mailer'
+
+    App\Service\EncryptionService:
+        arguments:
+            $encryptionKey: '%env(ENCRYPTION_KEY)%'
+
+    App\Service\UserHelper:
+        arguments:
+            $security: '@security.helper'
