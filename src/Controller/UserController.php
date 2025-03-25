@@ -65,7 +65,7 @@ class UserController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        $username = $data['username'] ?? null;
+        $username = $data['email'] ?? null;
         $password = $data['password'] ?? null;
 
         if (!$username || !$password) {
@@ -83,7 +83,7 @@ class UserController extends AbstractController
                 return new JsonResponse(
                     [
                         'message'   => "User logged in successfully",
-                        'username'  => $username,
+                        'email'  => $username,
                         'token'     => $JWTManager->create($user)
                     ],
                     Response::HTTP_OK
