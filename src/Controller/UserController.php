@@ -48,7 +48,7 @@ class UserController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            $this->mailerService->sendEmail($email, "Welcome!", "Thank you for registering!");
+            //$this->mailerService->sendEmail($email, "Welcome!", "Thank you for registering!");
 
             return new JsonResponse(['message' => "User created successfully"], Response::HTTP_CREATED);
 
