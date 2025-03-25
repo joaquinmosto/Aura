@@ -27,6 +27,7 @@ class Person
     private ?Document $document = null;
     
     #[ORM\OneToOne(mappedBy: 'person', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: true)]
     private ?User $user = null;
 
     public function getId(): ?int

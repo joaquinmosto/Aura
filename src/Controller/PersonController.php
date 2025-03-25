@@ -31,15 +31,6 @@ class PersonController extends AbstractController
                 AbstractNormalizer::ALLOW_EXTRA_ATTRIBUTES => true,
             ]
         );
-        
-        $requestData = json_decode($jsonData, true);
-
-        $address = $entityManager->getRepository(Address::class)->find($requestData['address']); 
-        $document = $entityManager->getRepository(Document::class)->find($requestData['document']); 
-        $user = $entityManager->getRepository(User::class)->find($requestData['user']); 
-        $person->setAddress($address); 
-        $person->setDocument($document); 
-        $person->setUser($user);
 
         $entityManager->persist($person);
         $entityManager->flush();
