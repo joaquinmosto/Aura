@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Service\MailerService;
+use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,10 +20,12 @@ use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 class UserController extends AbstractController
 {
     private $mailerService;
+    private $userService;
 
-    public function __construct(MailerService $mailerService)
+    public function __construct(MailerService $mailerService, UserService $userService)
     {
         $this->mailerService = $mailerService;
+        $this->userService = $userService;
     }
 
     #[Route("/register", name: "register", methods: ['POST'])]
@@ -62,7 +65,7 @@ class UserController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        $username = $data['username'] ?? null;
+        $username = $data['email'] ?? null;
         $password = $data['password'] ?? null;
 
         if (!$username || !$password) {
@@ -80,7 +83,7 @@ class UserController extends AbstractController
                 return new JsonResponse(
                     [
                         'message'   => "User logged in successfully",
-                        'username'  => $username,
+                        'email'  => $username,
                         'token'     => $JWTManager->create($user)
                     ],
                     Response::HTTP_OK
@@ -103,5 +106,20 @@ class UserController extends AbstractController
     #[Route("/logout", name: "logout")]
     public function logout(): void
     {
+    }
+
+    #[Route("/user/data", name: "user_data", methods: ['GET'])]
+    public function getUserData(): JsonResponse
+    {
+        $user = $this->userService->getUserData();
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not found'], 404);
+        }
+
+        return new JsonResponse([
+            'id' => $user->getId(),
+            'email' => $user->getEmail(),
+        ]);
     }
 }

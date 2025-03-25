@@ -27,3 +27,13 @@ services:
     App\Service\MailerService:
         arguments:
             $mailer: '@mailer'
+
+    App\Service\EncryptionService:
+        arguments:
+            $encryptionKey: '%env(ENCRYPTION_KEY)%'
+
+    App\Service\UserService:
+        arguments:
+            $security: '@security.helper'
+
+    Symfony\Component\Security\Core\User\UserProviderInterface: '@security.user.provider.concrete.app_user_provider'
